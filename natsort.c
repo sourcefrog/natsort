@@ -21,6 +21,11 @@
    3. This notice may not be removed or altered from any source distribution.
 */
 
+/* Partial change history:
+ *
+ * 2003-03-18: Add --reverse option, from Alessandro Pisani.
+ */
+
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -34,7 +39,7 @@
 #  define UNUSED __attribute__((__unused__))
 #endif
 
-static int fold_case = 0, verbose = 0;
+static int fold_case = 0, verbose = 0, reverse = 0;
 
 static void trace_result(char const *a, char const *b, int ret)
 {
@@ -62,8 +67,11 @@ static int compare_strings(const void *a, const void *b)
 	  ret = strnatcasecmp(pa, pb);
      else
 	  ret = strnatcmp(pa, pb);
-     
-     if (verbose)
+
+	 if (reverse)
+	  ret *= -1;
+
+	 if (verbose)
 	  trace_result(pa, pb, ret);
 
      return ret;
@@ -78,7 +86,8 @@ static void usage(void)
 	     "\n"
 	     "  --help, -h       show help text\n"
 	     "  --verbose, -v    show comparisons\n"
-	     "  --fold-case, -f  ignore case differences for letters\n");
+	     "  --fold-case, -f  ignore case differences for letters\n"
+		 "  --reverse, -r	 reverse the result of comparisons\n");
 }
 
 
@@ -93,13 +102,14 @@ int main(int argc, char **argv)
 
      static struct option long_options[] = {
 	  { "verbose", 0, NULL, 'v'},
+	  { "reverse", 0, NULL, 'r'},
 	  { "fold-case", 0, NULL, 'f'},
 	  { "help", 0, 0, 'h' },
 	  { 0, 0, 0, 0 }
      };
 
      /* process arguments */
-     while ((c = getopt_long(argc, argv, "fvh", long_options, &opt_ind)) != -1) {	  
+     while ((c = getopt_long(argc, argv, "frvh", long_options, &opt_ind)) != -1) {	  
 	  switch (c) {
 	  case 'f':
 	       fold_case = 1;
@@ -107,6 +117,9 @@ int main(int argc, char **argv)
 	  case 'h':
 	       usage();
 	       return 0;
+	  case 'r':
+	  	   reverse = 1;
+		   break;
 	  case 'v':
 	       verbose = 1;
 	       break;
