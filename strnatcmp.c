@@ -27,14 +27,6 @@
 
 #include "strnatcmp.h"
 
-#if defined(__GNUC__)
-#  define UNUSED __attribute__((__unused__))
-#else
-#  define UNUSED
-#endif
-
-static char const *version UNUSED =
-    "$Id: strnatcmp.c,v 1.6 2000/04/20 07:30:11 mbp Exp $";
 
 
 static int
