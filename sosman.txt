@@ -1,0 +1,101 @@
+Return-Path: <Eric.Sosman@Sun.COM>
+X-OfflineIMAP-163397380-4f7a6c616273-494e424f58: 1074122979-000541449629321
+X-Original-To: mbp.sourcefrog.net
+Delivered-To: mbp.ozlabs.org
+Received: from nwkea-mail-2.sun.com (nwkea-mail-2.sun.com [192.18.42.14])
+	by ozlabs.org (Postfix) with ESMTP id 453CB2BD32
+	for <mbp.sourcefrog.net>; Wed, 24 Dec 2003 07:01:47 +1100 (EST)
+Received: from phys-bur-1 ([129.148.9.72])
+	by nwkea-mail-2.sun.com (8.12.10/8.12.9) with ESMTP id hBNK1i0H026394
+	for <mbp.sourcefrog.net>; Tue, 23 Dec 2003 12:01:45 -0800 (PST)
+Received: from sun.com (tardis.East.Sun.COM [129.148.168.113])
+ by bur-mail1.east.sun.com
+ (iPlanet Messaging Server 5.2 HotFix 1.16 (built May 14 2003))
+ with ESMTPA id <0HQD00BUX6AWIO.bur-mail1.east.sun.com> for mbp.sourcefrog.net;
+ Tue, 23 Dec 2003 15:01:44 -0500 (EST)
+Date: Tue, 23 Dec 2003 15:01:44 -0500
+From: Eric Sosman <Eric.Sosman.Sun.COM>
+Subject: Lurking bug in strnatcmp()
+Sender: Eric.Sosman.Sun.COM
+To: mbp.sourcefrog.net
+Reply-To: Eric.Sosman.Sun.COM
+Message-id: <3FE89F28.56FC1586.sun.com>
+Organization: Sun Microsystems
+MIME-version: 1.0
+X-Mailer: Mozilla 4.79C-CCK-MCD  [en] (X11; U; SunOS 5.8 sun4u)
+Content-type: text/plain; charset=iso-8859-1
+Content-transfer-encoding: quoted-printable
+X-Accept-Language: en
+X-Spam-Checker-Version: SpamAssassin 2.60 (1.212-2003-09-23-exp) on 
+	ozlabs.tip.net.au
+X-Spam-Level: 
+X-Spam-Status: No, hits=-4.9 required=3.5 tests=BAYES_00 autolearn=ham 
+	version=2.60
+Content-Length: 2587
+Lines: 65
+
+
+    A few days ago I came across a link to your "natural
+string comparison" implementations at
+
+	http://sourcefrog.net/projects/natsort/
+
+The work strikes me as a splendid idea, and I'll probably
+start using the code in my own private projects.
+
+    However, I noticed that the C implementation has several
+times fallen victim to a rather nasty little linguistic trap:
+it is *not* safe to pass an ordinary char value to the <ctype.h>
+functions: isdigit(), isspace(), toupper(), and so forth.  Yes,
+it looks like this is the intended usage, and it happens that
+you'll very often get away with the error -- but it's an error
+nonetheless.
+
+    Here's why: The argument to a <ctype.h> function must be
+
+	"[...] an int, the value of which shall be representable
+	as an unsigned char or shall equal the value of the macro
+	EOF.  If the argument has any other value, the behavior
+	is undefined."
+	-- ISO/IEC 9899:1999 (aka "C99"), Section 7.4, paragraph 1
+
+That is, ordinary character codes are to be represented as non-
+negative values; the only negative argument for which the <ctype.h>
+functions are defined is the special value EOF.
+
+    EOF isn't a concern when plucking char values out of a string,
+but you must contend with the possibility that a char value might
+be negative.  This won't happen if the implementation defines its
+char as an unsigned type, or if the characters are taken from "the
+basic execution character set," whose codes are required to be non-
+negative (Section 6.2.5, paragraph 3).  But on an implementation
+where char is signed, characters from "the extended execution set"
+can have negative codes -- and this will raise merry Hell.  Try it
+if you like: compile srtnatcmp() on a signed-char implementation
+(with gcc, you can use the -fsigned-char flag) and then feed it a
+few strings like "A=EFda" or "Cos=EC fan tutte" or "G=F6tterd=E4mmerung"
+and watch for odd behavior ...
+
+    The recommended cure is to force unsignedness explicitly:
+
+	char ca;
+	...
+	while (isspace( (unsigned char)ca ))
+	    ...
+	if (isdigit( (unsigned char)ca ))
+	    ...
+	ca =3D toupper( (unsigned char)ca ));
+
+=2E.. and so forth.  This eliminates any chance that a char with a
+high-order one-bit will be sign-extended upon promotion to int.
+
+    By the way, there is no analogous problem in Java, where all
+char values are non-negative.  IMHO this is a defect in C, one of
+the few things Writchie got Rong -- but in his defense, I must
+admit that had I been he I'd certainly have done even worse.
+
+    Thanks again for the ideas behind strnatcmp(); I like it!
+
+-- =
+
+Eric.Sosman.sun.com

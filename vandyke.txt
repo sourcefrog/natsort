@@ -1,0 +1,76 @@
+Return-Path: <bryan.ivandyke.com>
+X-Original-To: mbp.sourcefrog.net
+Delivered-To: mbp.ozlabs.org
+Received: from mta5.wss.scd.yahoo.com (mta5.wss.scd.yahoo.com [66.218.85.36])
+	by ozlabs.org (Postfix) with ESMTP id 26BEB2BD6B
+	for <mbp.sourcefrog.net>; Sat, 31 Jul 2004 05:16:07 +1000 (EST)
+Received: from [192.168.0.15] (64.25.194.20) by mta5.wss.scd.yahoo.com (7.0.016) (authenticated as bryan.ivandyke.com)
+        id 40A02BAF03A65A34 for mbp.sourcefrog.net; Fri, 30 Jul 2004 12:16:01 -0700
+Message-ID: <410A9E73.20301.ivandyke.com>
+Date: Fri, 30 Jul 2004 15:16:03 -0400
+From: Bryan VanDyke <bryan.ivandyke.com>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7) Gecko/20040616
+X-Accept-Language: en-us, en
+MIME-Version: 1.0
+To: mbp.sourcefrog.net
+Subject: Possible bug in natural sort strnatcmp.c
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Spam-Checker-Version: SpamAssassin 2.63 (2004-01-11) on ozlabs.org
+X-Spam-Level: 
+X-Spam-Status: No, hits=-4.1 required=3.2 tests=BAYES_00,RCVD_IN_BLARS_RBL 
+	autolearn=no version=2.63
+Content-Length: 791
+Lines: 51
+
+Mr. Pool,
+
+First, thank you for sharing your nice piece of code.
+
+I was trying it out and was getting some weird results. It was giving 
+results different than what I wanted. I made a minor modification and 
+thought I pass the changes back to you incase they may be of some 
+usefullness.
+
+With the files:
+01.txt
+03.txt
+12.txt
+2.txt
+21.txt
+
+It sorted as:
+01.txt
+03.txt
+2.txt  <---
+12.txt
+21.txt
+
+I found by changing:
+
+/* skip over leading spaces or zeros */
+while (isspace(ca))
+     ca = a[++ai];
+
+while (isspace(cb))
+   cb = b[++bi];
+
+TO:
+
+/* skip over leading spaces or zeros */
+while (isspace(ca) || ca == '0' )
+     ca = a[++ai];
+
+while (isspace(cb) || cb == '0' )
+     cb = b[++bi];
+
+I get the results I wanted:
+
+01.txt
+2.txt  <---
+03.txt
+12.txt
+21.txt
+
+Bryan VanDyke
+bryan.ivandyke.com
