@@ -20,6 +20,16 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+
+/* partial change history:
+ *
+ * 2004-10-10 mbp: Lift out character type dependencies into macros.
+ *
+ * Eric Sosman pointed out that ctype functions take a parameter whose
+ * value must be that of an unsigned int, even on platforms that have
+ * negative chars in their default char type.
+ */
+
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
@@ -28,9 +38,32 @@
 #include "strnatcmp.h"
 
 
+/* These are defined as macros to make it easier to adapt this code to
+ * different characters types or comparison functions. */
+static inline int
+nat_isdigit(nat_char a)
+{
+     return isdigit((unsigned char) a);
+}
+
+
+static inline int
+nat_isspace(nat_char a)
+{
+     return isspace((unsigned char) a);
+}
+
+
+static inline nat_char
+nat_toupper(nat_char a)
+{
+     return toupper((unsigned char) a);
+}
+
+
 
 static int
-compare_right(char const *a, char const *b)
+compare_right(nat_char const *a, nat_char const *b)
 {
      int bias = 0;
      
@@ -39,11 +72,11 @@ compare_right(char const *a, char const *b)
 	both numbers to know that they have the same magnitude, so we
 	remember it in BIAS. */
      for (;; a++, b++) {
-	  if (!isdigit(*a)  &&  !isdigit(*b))
+	  if (!nat_isdigit(*a)  &&  !nat_isdigit(*b))
 	       return bias;
-	  else if (!isdigit(*a))
+	  else if (!nat_isdigit(*a))
 	       return -1;
-	  else if (!isdigit(*b))
+	  else if (!nat_isdigit(*b))
 	       return +1;
 	  else if (*a < *b) {
 	       if (!bias)
@@ -60,16 +93,16 @@ compare_right(char const *a, char const *b)
 
 
 static int
-compare_left(char const *a, char const *b)
+compare_left(nat_char const *a, nat_char const *b)
 {
      /* Compare two left-aligned numbers: the first to have a
         different value wins. */
      for (;; a++, b++) {
-	  if (!isdigit(*a)  &&  !isdigit(*b))
+	  if (!nat_isdigit(*a)  &&  !nat_isdigit(*b))
 	       return 0;
-	  else if (!isdigit(*a))
+	  else if (!nat_isdigit(*a))
 	       return -1;
-	  else if (!isdigit(*b))
+	  else if (!nat_isdigit(*b))
 	       return +1;
 	  else if (*a < *b)
 	       return -1;
@@ -81,10 +114,10 @@ compare_left(char const *a, char const *b)
 }
 
 
-static int strnatcmp0(char const *a, char const *b, int fold_case)
+static int strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
 {
      int ai, bi;
-     char ca, cb;
+     nat_char ca, cb;
      int fractional, result;
      
      assert(a && b);
@@ -93,14 +126,14 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
 	  ca = a[ai]; cb = b[bi];
 
 	  /* skip over leading spaces or zeros */
-	  while (isspace(ca))
+	  while (nat_isspace(ca))
 	       ca = a[++ai];
 
-	  while (isspace(cb))
+	  while (nat_isspace(cb))
 	       cb = b[++bi];
 
 	  /* process run of digits */
-	  if (isdigit(ca)  &&  isdigit(cb)) {
+	  if (nat_isdigit(ca)  &&  nat_isdigit(cb)) {
 	       fractional = (ca == '0' || cb == '0');
 
 	       if (fractional) {
@@ -119,8 +152,8 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
 	  }
 
 	  if (fold_case) {
-	       ca = toupper(ca);
-	       cb = toupper(cb);
+	       ca = nat_toupper(ca);
+	       cb = nat_toupper(cb);
 	  }
 	  
 	  if (ca < cb)
@@ -134,12 +167,12 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
 
 
 
-int strnatcmp(char const *a, char const *b) {
+int strnatcmp(nat_char const *a, nat_char const *b) {
      return strnatcmp0(a, b, 0);
 }
 
 
 /* Compare, recognizing numeric string and ignoring case. */
-int strnatcasecmp(char const *a, char const *b) {
+int strnatcasecmp(nat_char const *a, nat_char const *b) {
      return strnatcmp0(a, b, 1);
 }
