@@ -60,14 +60,18 @@ in which case numeric fields are separated by nonnumeric characters.
 Leading spaces are ignored.  This works very well for IP addresses
 from log files, for example.
 
-    <p>
-      Numeric substrings with leading zeros are considered to be
-      fractional:
-    </p>
+<p>
+Leading zeros are <u>not</u> ignored, which tends to give more
+reasonable results on decimal fractions.  
+</p>
     
     <blockquote>
       1.001 &lt; 1.002 &lt; 1.010 &lt; 1.02 &lt; 1.1 &lt; 1.3
     </blockquote>
+
+<p>Some applications may wish to change this by modifying the test
+      that calls <code>isspace</code>.
+    
 
     <p>
       Performance is linear: each character of the string is scanned
