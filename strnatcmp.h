@@ -1,7 +1,7 @@
 /* -*- mode: c; c-file-style: "k&r" -*-
 
   strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
-  Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
+  Copyright (C) 2000, 2004 by Martin Pool <mbp sourcefrog net>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
