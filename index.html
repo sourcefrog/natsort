@@ -175,9 +175,20 @@ reimplement the idea fom scratch in any language.
 
   <h2>To Do</h2>
 
-  <ul>
-    <li>UNICODE and/or NLS support in C
-  </ul>
+  <p>
+    Comparison of characters is purely numeric, without taking
+    character set or locale into account.  So it is only correct for
+    ASCII.  This should probably be a separate function because doing
+    the comparisons will probably introduce a dependency on the OS
+    mechanism for finding the locale and comparing characters.
+
+
+  <p>
+    It might be good to support multibyte character sets too.
+
+  <p>
+    If you fix either of these, please mail me.  They should not be
+    very hard.
 
 </body>
 </html>
