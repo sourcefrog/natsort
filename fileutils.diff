@@ -1,0 +1,274 @@
+--- fileutils-4.0/lib/Makefile.am	Sun Sep  6 22:20:49 1998
++++ fileutils/lib/Makefile.am	Wed Mar  8 20:16:59 2000
+@@ -11,7 +11,8 @@
+ closeout.c dirname.c exclude.c filemode.c \
+ full-write.c human.c idcache.c \
+ isdir.c long-options.c makepath.c modechange.c hash.c path-concat.c \
+-quotearg.c safe-read.c save-cwd.c savedir.c stripslash.c userspec.c xgetcwd.c \
++quotearg.c safe-read.c save-cwd.c savedir.c stripslash.c \
++strnatcmp.c userspec.c xgetcwd.c \
+ xmalloc.c xstrdup.c xstrtol.c xstrtoul.c yesno.c
+ 
+ libfu_a_LIBADD = @LIBOBJS@ @ALLOCA@
+@@ -21,7 +22,8 @@
+ error.h exclude.h filemode.h fnmatch.h fsusage.h \
+ getdate.h getline.h getopt.h group-member.h human.h lchown.h long-options.h \
+ makepath.h modechange.h mountlist.h hash.h path-concat.h pathmax.h \
+-posixtm.h quotearg.h regex.h safe-read.h save-cwd.h savedir.h strverscmp.h \
++posixtm.h quotearg.h regex.h safe-read.h save-cwd.h savedir.h \
++strnatcmp.h strverscmp.h \
+ xalloc.h xstrtol.h xstrtoul.h
+ 
+ BUILT_SOURCES = getdate.c
+--- fileutils-4.0/src/ls.c	Sat Sep 19 13:09:23 1998
++++ fileutils/src/ls.c	Fri Mar 10 15:56:42 2000
+@@ -1,5 +1,5 @@
+ /* `dir', `vdir' and `ls' directory listing programs for GNU.
+-   Copyright (C) 85, 88, 90, 91, 95, 96, 97, 1998 Free Software Foundation, Inc.
++   Copyright (C) 85, 88, 90, 91, 95-98, 2000 Free Software Foundation, Inc.
+ 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+@@ -34,7 +34,10 @@
+ 
+ /* Color support by Peter Anvin <Peter.Anvin@linux.org> and Dennis
+    Flaherty <dennisf@denix.elk.miles.com> based on original patches by
+-   Greg Lee <lee@uhunix.uhcc.hawaii.edu>.  */
++   Greg Lee <lee@uhunix.uhcc.hawaii.edu>.
++
++   Natural order sorting added by Martin Pool <mbp@humbug.org.au> in
++   2000. */
+ 
+ #ifdef _AIX
+  #pragma alloca
+@@ -73,6 +76,7 @@
+ #include "strverscmp.h"
+ #include "quotearg.h"
+ #include "filemode.h"
++#include "strnatcmp.h"
+ 
+ #define obstack_chunk_alloc malloc
+ #define obstack_chunk_free free
+@@ -162,6 +166,10 @@
+ 				 const struct fileinfo *file2));
+ static int rev_cmp_name PARAMS ((const struct fileinfo *file2,
+ 				 const struct fileinfo *file1));
++static int compare_natural PARAMS ((const struct fileinfo *file1,
++				    const struct fileinfo *file2));
++static int rev_cmp_natural PARAMS ((const struct fileinfo *file2,
++				    const struct fileinfo *file1));
+ static int compare_extension PARAMS ((const struct fileinfo *file1,
+ 				      const struct fileinfo *file2));
+ static int rev_cmp_extension PARAMS ((const struct fileinfo *file2,
+@@ -294,7 +302,8 @@
+     sort_extension,		/* -X */
+     sort_time,			/* -t */
+     sort_size,			/* -S */
+-    sort_version		/* -v */
++    sort_version,		/* -v */
++    sort_natural
+   };
+ 
+ static enum sort_type sort_type;
+@@ -552,12 +561,12 @@
+ 
+ static char const *const sort_args[] =
+ {
+-  "none", "time", "size", "extension", "version", 0
++  "none", "time", "size", "extension", "version", "natural", 0
+ };
+ 
+ static enum sort_type const sort_types[] =
+ {
+-  sort_none, sort_time, sort_size, sort_extension, sort_version
++  sort_none, sort_time, sort_size, sort_extension, sort_version, sort_natural
+ };
+ 
+ static char const *const time_args[] =
+@@ -1977,6 +1986,9 @@
+     case sort_version:
+       func = sort_reverse ? rev_cmp_version : compare_version;
+       break;
++    case sort_natural:
++      func = sort_reverse ? rev_cmp_natural : compare_natural;
++      break;
+     default:
+       abort ();
+     }
+@@ -2082,6 +2094,21 @@
+   return strcmp (file1->name, file2->name);
+ }
+ 
++static int
++compare_natural (const struct fileinfo *file1, const struct fileinfo *file2)
++{
++  int diff = strnatcmp (file1->name, file2->name);
++  if (!diff)
++    diff = strcmp (file1->name, file2->name);
++  return diff;
++}
++
++static int
++rev_cmp_natural (const struct fileinfo *file1, const struct fileinfo *file2)
++{
++  return -compare_natural (file1, file2);
++}
++
+ /* Compare file extensions.  Files with no extension are `smallest'.
+    If extensions are the same, compare by filenames instead. */
+ 
+@@ -2911,7 +2938,7 @@
+       printf (_("\
+   -S                         sort by file size\n\
+       --sort=WORD            extension -X, none -U, size -S, time -t,\n\
+-                               version -v\n\
++                               version -v, natural\n\
+                              status -c, time -t, atime -u, access -u, use -u\n\
+       --time=WORD            show time as WORD instead of modification time:\n\
+                                atime, access, use, ctime or status; use\n\
+--- /dev/null	Tue May  5 16:32:27 1998
++++ fileutils/lib/strnatcmp.c	Sat Mar  4 22:28:42 2000
+@@ -0,0 +1,116 @@
++/* -*- mode: c; c-file-style: "k&r" -*-
++
++  strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
++  Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++
++#include <ctype.h>
++#include <string.h>
++#include <assert.h>
++#include <stdio.h>
++
++#include "strnatcmp.h"
++
++#if defined(__GNUC__)
++#  define UNUSED __attribute__((__unused__))
++#endif
++
++static char const *version UNUSED =
++    "$Id: strnatcmp.c,v 1.4 2000/03/05 03:28:42 mbp Exp $";
++
++
++static int strnatcmp0(char const *a, char const *b, int fold_case)
++{
++     int ai, bi;
++     char ca, cb;
++     
++     assert(a && b);
++     ai = bi = 0;
++     while (1) {
++	  ca = a[ai]; cb = b[bi];
++
++	  /* skip over leading spaces or zeros */
++	  while (isspace(ca)  ||  ca == '0')
++	       ca = a[++ai];
++
++	  while (isspace(cb)  ||  cb == '0')
++	       cb = b[++bi];
++
++	  /* process run of digits */
++	  if (isdigit(ca)  &&  isdigit(cb)) {
++	       int bias = 0;
++	       /* The longest run of digits (stripping off leading
++		  zeros) wins.  That aside, the greatest value wins,
++		  but we can't know that it will until we've scanned
++		  both numbers to know that they have the same
++		  magnitude, so we remember it in BIAS. */
++	       while (1) {
++		    if (!isdigit(ca)  &&  !isdigit(cb))
++			 goto done_number;
++		    else if (!isdigit(ca))
++			 return -1;
++		    else if (!isdigit(cb))
++			 return +1;
++		    else if (ca < cb) {
++			 if (!bias)
++			      bias = -1;
++		    } else if (ca > cb) {
++			 if (!bias)
++			      bias = +1;
++		    } else if (!ca  &&  !cb)
++			 return bias;
++
++		    ca = a[++ai]; cb = b[++bi];
++	       }
++	  done_number:
++	       if (bias)
++		    return bias;
++	  }
++
++	  if (!ca && !cb) {
++	       /* The strings compare the same.  Perhaps the caller
++                  will want to call strcmp to break the tie. */
++	       return 0;
++	  }
++
++	  if (fold_case) {
++	       ca = toupper(ca);
++	       cb = toupper(cb);
++	  }
++	  
++	  if (ca < cb)
++	       return -1;
++	  else if (ca > cb)
++	       return +1;
++
++	  ++ai; ++bi;
++     }
++}
++
++
++
++int strnatcmp(char const *a, char const *b) {
++     return strnatcmp0(a, b, 0);
++}
++
++
++/* Compare, recognizing numeric string and ignoring case. */
++int strnatcasecmp(char const *a, char const *b) {
++     return strnatcmp0(a, b, 1);
++}
+--- /dev/null	Tue May  5 16:32:27 1998
++++ fileutils/lib/strnatcmp.h	Sat Mar  4 22:05:56 2000
+@@ -0,0 +1,24 @@
++/* -*- mode: c; c-file-style: "k&r" -*-
++
++  strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
++  Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
++
++  This software is provided 'as-is', without any express or implied
++  warranty.  In no event will the authors be held liable for any damages
++  arising from the use of this software.
++
++  Permission is granted to anyone to use this software for any purpose,
++  including commercial applications, and to alter it and redistribute it
++  freely, subject to the following restrictions:
++
++  1. The origin of this software must not be misrepresented; you must not
++     claim that you wrote the original software. If you use this software
++     in a product, an acknowledgment in the product documentation would be
++     appreciated but is not required.
++  2. Altered source versions must be plainly marked as such, and must not be
++     misrepresented as being the original software.
++  3. This notice may not be removed or altered from any source distribution.
++*/
++
++int strnatcmp(char const *a, char const *b);
++int strnatcasecmp(char const *a, char const *b);
