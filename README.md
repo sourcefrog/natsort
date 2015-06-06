@@ -81,6 +81,16 @@ the same licence as zlib:
 This licence applies only to the C implementation.  You are free to
 reimplement the idea fom scratch in any language.
 
+## Get It!
+
+`strnatcmp.c`, `strnatcmp.h` - the algorithm itself
+
+`natsort.c` - example driver program.
+
+`natcompare.js` - Kristof Coomans wrote a natural sort comparison in Javascript.
+
+`natcmp.rb` -- An implementation by Alan Davies in Ruby.
+
 ## Related Work
 
 
@@ -125,19 +135,9 @@ Pierre-Luc Paour wrote a
 [`NaturalOrderComparator`](http://pierre-luc.paour.9online.fr/NaturalOrderComparator.java)
 in Java.
 
-`natcompare.js` - Kristof Coomans wrote a natural sort comparison in Javascript.
-
-`natcmp.rb` -- An implementation by Alan Davies in Ruby.
-
 [Numacomp](http://sourceforge.net/projects/numacomp) - similar thing in Python.
 
 [as3natcompare](http://code.google.com/p/as3natcompare/) implementation in Flash ActionScript 3.
-
-## Get It!
-
-`strnatcmp.c`, `strnatcmp.h` - the algorithm itself
-
-`natsort.c` - example driver program.
 
 ## To Do
 
