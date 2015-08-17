@@ -30,6 +30,7 @@
  * negative chars in their default char type.
  */
 
+#include <stddef.h>	/* size_t */
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
