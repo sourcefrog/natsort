@@ -62,7 +62,6 @@ nat_toupper(nat_char a)
 }
 
 
-
 static int
 compare_right(nat_char const *a, nat_char const *b)
 {
@@ -110,7 +109,7 @@ compare_left(nat_char const *a, nat_char const *b)
 	  else if (*a > *b)
 	       return +1;
      }
-	  
+
      return 0;
 }
 
@@ -120,7 +119,7 @@ static int strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
      int ai, bi;
      nat_char ca, cb;
      int fractional, result;
-     
+
      assert(a && b);
      ai = bi = 0;
      while (1) {
@@ -156,7 +155,7 @@ static int strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
 	       ca = nat_toupper(ca);
 	       cb = nat_toupper(cb);
 	  }
-	  
+
 	  if (ca < cb)
 	       return -1;
 	  else if (ca > cb)
@@ -165,7 +164,6 @@ static int strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
 	  ++ai; ++bi;
      }
 }
-
 
 
 int strnatcmp(nat_char const *a, nat_char const *b) {
