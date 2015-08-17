@@ -74,11 +74,11 @@ compare_right(nat_char const *a, nat_char const *b)
      for (;; a++, b++) {
 	  if (!nat_isdigit(*a)  &&  !nat_isdigit(*b))
 	       return bias;
-	  else if (!nat_isdigit(*a))
+	  if (!nat_isdigit(*a))
 	       return -1;
-	  else if (!nat_isdigit(*b))
+	  if (!nat_isdigit(*b))
 	       return +1;
-	  else if (*a < *b) {
+	  if (*a < *b) {
 	       if (!bias)
 		    bias = -1;
 	  } else if (*a > *b) {
@@ -100,13 +100,13 @@ compare_left(nat_char const *a, nat_char const *b)
      for (;; a++, b++) {
 	  if (!nat_isdigit(*a)  &&  !nat_isdigit(*b))
 	       return 0;
-	  else if (!nat_isdigit(*a))
+	  if (!nat_isdigit(*a))
 	       return -1;
-	  else if (!nat_isdigit(*b))
+	  if (!nat_isdigit(*b))
 	       return +1;
-	  else if (*a < *b)
+	  if (*a < *b)
 	       return -1;
-	  else if (*a > *b)
+	  if (*a > *b)
 	       return +1;
      }
 
@@ -158,7 +158,8 @@ static int strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
 
 	  if (ca < cb)
 	       return -1;
-	  else if (ca > cb)
+
+	  if (ca > cb)
 	       return +1;
 
 	  ++ai; ++bi;
