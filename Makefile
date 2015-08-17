@@ -1,4 +1,11 @@
 CFLAGS = -Wall -g -Werror
 
-natsort: strnatcmp.o natsort.o
-	$(CC) -o $@ strnatcmp.o natsort.o
+OBJS = strnatcmp.o natsort.o
+
+.PHONY: clean
+
+natsort: $(OBJS)
+	$(CC) -o $@ $(OBJS)
+
+clean:
+	rm natsort $(OBJS)
