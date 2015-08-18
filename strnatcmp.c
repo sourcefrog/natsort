@@ -32,9 +32,6 @@
 
 #include <stddef.h>	/* size_t */
 #include <ctype.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 
 #include "strnatcmp.h"
 
@@ -121,7 +118,6 @@ strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
      nat_char ca, cb;
      int fractional, result;
 
-     assert(a && b);
      ai = bi = 0;
      while (1) {
 	  ca = a[ai]; cb = b[bi];
