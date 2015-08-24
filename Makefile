@@ -11,4 +11,4 @@ test: natsort
 	@bash ./run-tests.bash
 
 clean:
-	rm natsort $(OBJS)
+	rm -f natsort $(OBJS)
