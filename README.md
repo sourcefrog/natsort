@@ -34,7 +34,7 @@ are compared on their numeric value.  For example,
 
 Strings can contain several number parts:
 
-    x2-g8 < x2-y7 < x2-y08 < x8-y8
+    x2-g8 < x2-y08 < x2-y7 < x8-y8
 
 in which case numeric fields are separated by nonnumeric characters.
 Leading spaces are ignored.  This works very well for IP addresses
