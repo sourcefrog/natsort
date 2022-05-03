@@ -132,7 +132,7 @@ Ed Avis wrote [something similar in Haskell](http://membled.com/work/apps/todo/n
 
 
 Pierre-Luc Paour wrote a
-[`NaturalOrderComparator`](http://pierre-luc.paour.9online.fr/NaturalOrderComparator.java)
+[`NaturalOrderComparator`](http://github.com/paour/natorder)
 in Java.
 
 [Numacomp](http://sourceforge.net/projects/numacomp) - similar thing in Python.
