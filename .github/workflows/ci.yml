@@ -3,6 +3,18 @@ name: Build
 on: [push]
 
 jobs:
+  Analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-tools
+      - name: Analyze
+        run: make analyze
+
   Build:
     strategy:
       matrix:
