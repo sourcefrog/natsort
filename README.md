@@ -1,5 +1,7 @@
 # Natural Order String Comparison
 
+[![Build](https://github.com/sourcefrog/natsort/actions/workflows/ci.yml/badge.svg)](https://github.com/sourcefrog/natsort/actions/workflows/ci.yml)
+
 Martin Pool <http://sourcefrog.net>
 
 Computer string sorting algorithms generally don't order strings

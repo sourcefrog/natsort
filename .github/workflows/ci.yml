@@ -1,0 +1,17 @@
+name: Build
+
+on: [push]
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        cc: [gcc, clang]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Compile
+        env:
+          CC: ${{matrix.cc}}
+        run: make test
