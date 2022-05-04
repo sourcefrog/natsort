@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 {
      int nlines = 0;
      char *line;
-     char **list = 0;
+     char **rlist, **list = 0;
      int linelen = 0, i;
      int c, opt_ind;
      size_t bufsize;
@@ -139,22 +139,26 @@ int main(int argc, char **argv)
 	  if (line[linelen-1] == '\n')
 	       line[--linelen] = 0;
 	  nlines++;
-	  list = (char **) realloc(list, nlines * sizeof list[0]);
-	  if (!list) {
+	  rlist = (char **) realloc(list, nlines * sizeof list[0]);
+	  if (!rlist) {
 	       perror("allocate list");
+	       free(list);
 	       return 1;
 	  }	       
+	  list = rlist;
 	  list[nlines-1] = line;
      }
 
      if (ferror(stdin)) {
 	  perror("input");
+	  free(list);
 	  return 1;
      }
      fclose(stdin);
      
      /* quicksort */
-     qsort(list, nlines, sizeof list[0], compare_strings);
+     if (list)
+	  qsort(list, nlines, sizeof list[0], compare_strings);
      
      /* and output */
      for (i = 0; i < nlines; i++) {
