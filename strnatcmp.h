@@ -20,6 +20,9 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* CUSTOMIZATION SECTION
  *
@@ -29,3 +32,7 @@ typedef char nat_char;
 
 int strnatcmp(nat_char const *a, nat_char const *b);
 int strnatcasecmp(nat_char const *a, nat_char const *b);
+  
+#ifdef __cplusplus
+}
+#endif
