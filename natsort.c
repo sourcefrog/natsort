@@ -1,17 +1,17 @@
 /* -*- mode: c; c-file-style: "k&r" -*-
 
    natsort.c -- Example strnatcmp application.
-   
+
    Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
 
    This software is provided 'as-is', without any express or implied
    warranty.  In no event will the authors be held liable for any damages
    arising from the use of this software.
-   
+
    Permission is granted to anyone to use this software for any purpose,
    including commercial applications, and to alter it and redistribute it
    freely, subject to the following restrictions:
-   
+
    1. The origin of this software must not be misrepresented; you must not
       claim that you wrote the original software. If you use this software
       in a product, an acknowledgment in the product documentation would be
@@ -46,14 +46,14 @@ static void trace_result(char const *a, char const *b, int ret)
      char const *op;
 
      if (ret < 0)
-	  op = "<";
+          op = "<";
      else if (ret > 0)
-	  op = ">";
+          op = ">";
      else
-	  op = "==";
-     
+          op = "==";
+
      fprintf(stderr, "\tstrncatcmp: \"%s\" %s \"%s\"\n",
-	     a, op, b);
+             a, op, b);
 }
 
 
@@ -64,15 +64,15 @@ static int compare_strings(const void *a, const void *b)
      int ret;
 
      if (fold_case)
-	  ret = strnatcasecmp(pa, pb);
+          ret = strnatcasecmp(pa, pb);
      else
-	  ret = strnatcmp(pa, pb);
+          ret = strnatcmp(pa, pb);
 
-	 if (reverse)
-	  ret *= -1;
+         if (reverse)
+          ret *= -1;
 
-	 if (verbose)
-	  trace_result(pa, pb, ret);
+         if (verbose)
+          trace_result(pa, pb, ret);
 
      return ret;
 }
@@ -81,13 +81,13 @@ static int compare_strings(const void *a, const void *b)
 static void usage(void)
 {
      fprintf(stderr, "Usage: natsort [OPTIONS]\n"
-	     "Performs a natural sort on standard input, and writes to \n"
-	     "standard output.\n"
-	     "\n"
-	     "  --help, -h       show help text\n"
-	     "  --verbose, -v    show comparisons\n"
-	     "  --fold-case, -f  ignore case differences for letters\n"
-		 "  --reverse, -r	 reverse the result of comparisons\n");
+             "Performs a natural sort on standard input, and writes to \n"
+             "standard output.\n"
+             "\n"
+             "  --help, -h       show help text\n"
+             "  --verbose, -v    show comparisons\n"
+             "  --fold-case, -f  ignore case differences for letters\n"
+                 "  --reverse, -r        reverse the result of comparisons\n");
 }
 
 
@@ -101,72 +101,72 @@ int main(int argc, char **argv)
      size_t bufsize;
 
      static struct option long_options[] = {
-	  { "verbose", 0, NULL, 'v'},
-	  { "reverse", 0, NULL, 'r'},
-	  { "fold-case", 0, NULL, 'f'},
-	  { "help", 0, 0, 'h' },
-	  { 0, 0, 0, 0 }
+          { "verbose", 0, NULL, 'v'},
+          { "reverse", 0, NULL, 'r'},
+          { "fold-case", 0, NULL, 'f'},
+          { "help", 0, 0, 'h' },
+          { 0, 0, 0, 0 }
      };
 
      /* process arguments */
-     while ((c = getopt_long(argc, argv, "frvh", long_options, &opt_ind)) != -1) {	  
-	  switch (c) {
-	  case 'f':
-	       fold_case = 1;
-	       break;
-	  case 'h':
-	       usage();
-	       return 0;
-	  case 'r':
-	  	   reverse = 1;
-		   break;
-	  case 'v':
-	       verbose = 1;
-	       break;
-	  case '?':
-	       return 1;
-	  default:
-	       abort();
-	  }
-     }	       
-     
+     while ((c = getopt_long(argc, argv, "frvh", long_options, &opt_ind)) != -1) {
+          switch (c) {
+          case 'f':
+               fold_case = 1;
+               break;
+          case 'h':
+               usage();
+               return 0;
+          case 'r':
+                   reverse = 1;
+                   break;
+          case 'v':
+               verbose = 1;
+               break;
+          case '?':
+               return 1;
+          default:
+               abort();
+          }
+     }
+
      /* read lines into an array */
      while (1) {
-	  line = NULL;
-	  bufsize = 0;
-	  if ((linelen = getline(&line, &bufsize, stdin)) <= 0)
-	       break;
-	  if (line[linelen-1] == '\n')
-	       line[--linelen] = 0;
-	  nlines++;
-	  rlist = (char **) realloc(list, nlines * sizeof list[0]);
-	  if (!rlist) {
-	       perror("allocate list");
-	       free(list);
-	       return 1;
-	  }	       
-	  list = rlist;
-	  list[nlines-1] = line;
+          line = NULL;
+          bufsize = 0;
+          if ((linelen = getline(&line, &bufsize, stdin)) <= 0)
+               break;
+          if (line[linelen-1] == '\n')
+               line[--linelen] = 0;
+          nlines++;
+          rlist = (char **) realloc(list, nlines * sizeof list[0]);
+          if (!rlist) {
+               perror("allocate list");
+               free(list);
+               return 1;
+          }
+          list = rlist;
+          list[nlines-1] = line;
      }
 
      if (ferror(stdin)) {
-	  perror("input");
-	  free(list);
-	  return 1;
+          perror("input");
+          free(list);
+          return 1;
      }
      fclose(stdin);
-     
+
      /* quicksort */
      if (list)
-	  qsort(list, nlines, sizeof list[0], compare_strings);
-     
+          qsort(list, nlines, sizeof list[0], compare_strings);
+
      /* and output */
      for (i = 0; i < nlines; i++) {
-	  puts(list[i]);
+          puts(list[i]);
      }
      if (ferror(stdout)) {
-	  perror("output");
-	  return 1;
+          perror("output");
+          return 1;
      }
 
      return 0;
