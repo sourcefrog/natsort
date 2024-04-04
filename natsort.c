@@ -26,7 +26,9 @@
  * 2003-03-18: Add --reverse option, from Alessandro Pisani.
  */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+     #define _GNU_SOURCE
+#endif 
 
 #include <stdio.h>
 #include <stdlib.h>
